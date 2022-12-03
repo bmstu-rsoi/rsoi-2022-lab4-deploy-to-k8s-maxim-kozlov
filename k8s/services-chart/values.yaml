@@ -1,0 +1,34 @@
+bonus:
+  service:
+    port: 8050
+    image:
+      name: maxkozlov/rsoi-bonus-service
+      version: "latest"
+    database:
+      name: privileges
+
+flight:
+  service:
+    port: 8060
+    image:
+      name: maxkozlov/rsoi-flight-service
+      version: "latest"
+    database: 
+      name: flights
+
+ticket:
+  service:
+    port: 8070
+    image:
+      name: maxkozlov/rsoi-ticket-service
+      version: "latest"
+    database: 
+      name: tickets
+
+gateway:
+  service:
+    port: 8080
+    image:
+      name: maxkozlov/rsoi-api-gateway
+      version: "latest"
+    isGateway: true
