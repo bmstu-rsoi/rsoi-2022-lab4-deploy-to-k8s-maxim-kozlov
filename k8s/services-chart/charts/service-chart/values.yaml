@@ -1,16 +1,24 @@
-domain: todo
+domain: localhost
 service:
   port:
   isGateway:
   image:
     name:
     version:
+
   database:
     name:
     host: postgres-service
     port: 5432
     username: postgres
     password: postgres
+
+  rabbitmq:
+    host: rabbitmq-0.rabbitmq-headless.default.svc.cluster.local
+    port: 5672
+    username: guest
+    password: guest
+
   resources:
     requests:
       cpu: 200m

@@ -1,0 +1,47 @@
+# kind create cluster --config kind.yaml 
+# cd k8s
+
+# helm install postgres ./postgres-chart
+# helm install postgres --debug --dry-run ./postgres-chart
+# RESTORE
+# // pod-name         name of the postgres pod
+# // postgres-user    database user that is able to access the database
+# // database-name    name of the database
+# cat database.sql | kubectl exec -i [pod-name] -- psql -U [postgres-user] -d [database-name]
+# ./scripts/fill-db.sh postgres-57b5f47bdd-9dsq2
+# helm uninstall postgres
+
+# helm install rabbitmq bitnami/rabbitmq --set image.repository='rabbitmq',image.tag='3.9.2-management-alpine',auth.username='guest',auth.password='guest'
+# - на маке м1 bitnami/rabbitmq:bitnami/rabbitmq не работает https://github.com/bitnami/charts/issues/7305
+# Credentials:
+#     echo "Username      : user"
+#     echo "Password      : $(kubectl get secret --namespace default rabbitmq -o jsonpath="{.data.rabbitmq-password}" | base64 -d)"
+#     echo "ErLang Cookie : $(kubectl get secret --namespace default rabbitmq -o jsonpath="{.data.rabbitmq-erlang-cookie}" | base64 -d)"
+# To Access the RabbitMQ Management interface:
+#     echo "URL : http://127.0.0.1:15672/"
+#     kubectl port-forward --namespace default svc/rabbitmq 15672:15672
+
+# helm install services ./services-chart
+# helm install services --debug --dry-run ./services-chart
+# helm uninstall services
+# kubectl apply -f load-balancer.yaml
+# kubectl get services
+
+# kind delete cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP

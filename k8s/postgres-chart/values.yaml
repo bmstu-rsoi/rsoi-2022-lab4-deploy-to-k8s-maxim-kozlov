@@ -9,6 +9,8 @@ default_database:
 users:
   - name: postgres
     password: postgres
+  - name: program
+    password: test
 
 datases:
   - name: tickets
@@ -17,7 +19,7 @@ datases:
   - name: flights
     user: program
 
-  - name: flights
+  - name: privileges
     user: program
 
 resources:
