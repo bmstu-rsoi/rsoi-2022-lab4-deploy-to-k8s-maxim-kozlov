@@ -20,6 +20,23 @@ jobs:
       #     ./scripts/publish.sh
       #     docker compose build
       #     ./scripts/push-images.sh
+      - uses: engineerd/setup-kind@v0.5.0
+      - name: Create cluster
+        run: |
+          kubectl cluster-info
+          kubectl get pods -n kube-system
+          echo "current-context:" $(kubectl config current-context)
+          echo "environment-kubeconfig:" ${KUBECONFIG}
+          echo "pwd:" ${pwd}
+          cd k8s
+          helm install postgres ./postgres-chart
+          ./scripts/fill-db.sh
+          helm install rabbitmq bitnami/rabbitmq --set image.repository='rabbitmq',image.tag='3.9.2-management-alpine',auth.username='guest',auth.password='guest'
+          helm install services ./services-chart
+          kubectl apply -f load-balancer.yaml
+          kubectl get services
+          kubectl get pods
+          sleep 45
 
       - name: Run API Tests
         uses: matt-ball/newman-action@master
