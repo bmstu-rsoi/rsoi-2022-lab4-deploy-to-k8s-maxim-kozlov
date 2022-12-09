@@ -11,8 +11,16 @@ metadata:
 data:
   10-create-user-and-dbs.sql: |
     {{- range $user := .Values.users }}
-    CREATE ROLE {{ $user.name }} WITH PASSWORD '{{ $user.password }}';
-    ALTER ROLE {{ $user.name }} WITH LOGIN;
+
+    do
+    $$
+    begin
+      if not exists (select * from pg_user where usename = '{{ $user.name }}') then
+        create role {{ $user.name }} password '{{ $user.password }}';
+        ALTER ROLE {{ $user.name }} WITH LOGIN;
+      end if;
+    end
+    $$;
     {{- end }}
     {{- range $database := .Values.datases }}
     CREATE DATABASE {{ $database.name }};

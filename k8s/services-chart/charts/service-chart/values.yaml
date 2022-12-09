@@ -1,4 +1,4 @@
-domain: localhost
+domain: maxim-kozlov.cloud.okteto.net
 service:
   port:
   isGateway:
@@ -12,12 +12,6 @@ service:
     port: 5432
     username: postgres
     password: postgres
-
-  rabbitmq:
-    host: rabbitmq-0.rabbitmq-headless.default.svc.cluster.local
-    port: 5672
-    username: guest
-    password: guest
 
   resources:
     requests:

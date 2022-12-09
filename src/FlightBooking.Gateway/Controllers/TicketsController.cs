@@ -13,8 +13,6 @@ using System.Net;
 using System.Net.Http;
 using AutoMapper;
 using FlightBooking.Gateway.Domain;
-using FlightBooking.Gateway.Dto;
-using FlightBooking.Gateway.Exceptions;
 
 namespace FlightBooking.Gateway.Controllers;
 
@@ -50,11 +48,6 @@ public class TicketsController: ControllerBase
             var tickets = await _ticketsService.GetAllAsync(username);
             return Ok(tickets);
         }
-        catch (ServiceUnavailableException ex)
-        {
-            _logger.LogError(ex, "Service is inoperative, please try later on");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new MessageDto($"{ex.ServiceName} unavailable"));
-        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error!");
@@ -83,11 +76,6 @@ public class TicketsController: ControllerBase
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             return NotFound(username);
-        }
-        catch (ServiceUnavailableException ex)
-        {
-            _logger.LogError(ex, "Service is inoperative, please try later on");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new MessageDto($"{ex.ServiceName} unavailable"));
         }
         catch (Exception ex)
         {
@@ -122,11 +110,6 @@ public class TicketsController: ControllerBase
         {
             return NotFound(ex.Message);
         }
-        catch (ServiceUnavailableException ex)
-        {
-            _logger.LogError(ex, "Service is inoperative, please try later on");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new MessageDto($"{ex.ServiceName} unavailable"));
-        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error!");
@@ -151,11 +134,6 @@ public class TicketsController: ControllerBase
         {
             await _ticketsService.DeleteAsync(username, ticketUid);
             return NoContent();
-        }
-        catch (ServiceUnavailableException ex)
-        {
-            _logger.LogError(ex, "Service is inoperative, please try later on");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new MessageDto($"{ex.ServiceName} unavailable"));
         }
         catch (Exception ex)
         {

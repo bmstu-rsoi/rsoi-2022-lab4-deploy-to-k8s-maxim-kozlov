@@ -1,8 +1,6 @@
 using System.Reflection;
 using FlightBooking.FlightService.Database;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 
@@ -21,7 +19,6 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddHealthChecks()
-            .AddCheck("self", () => HealthCheckResult.Healthy())
             .AddDbContextCheck<FlightsContext>();
         
         services.AddControllers()
@@ -62,10 +59,6 @@ public class Startup
         {
             endpoints.MapControllers();
             endpoints.MapHealthChecks("/manage/health");
-            endpoints.MapHealthChecks("/manage/health/liveness", new HealthCheckOptions
-            {
-                Predicate = r => r.Name.Contains("self")
-            });
         });
     }
 }

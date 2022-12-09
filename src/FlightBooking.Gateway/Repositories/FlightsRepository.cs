@@ -5,11 +5,9 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Web;
 using FlightBooking.FlightService.Dto;
-using FlightBooking.Gateway.Exceptions;
 using FlightBooking.Gateway.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Polly.CircuitBreaker;
 
 namespace FlightBooking.Gateway.Repositories;
 
@@ -32,35 +30,21 @@ public class FlightsRepository : IFlightsRepository
     
     public async Task<PaginationFlightsResponse> GetAllAsync(int page, int size)
     {
-        try
-        {
-            var response = await _client.GetAsync($"/api/v1/flights/?page={page}&size={size}");
-            if (!response.IsSuccessStatusCode)
-                _logger.LogWarning("Failed get flights {statusCode}, {descriprion}", response.StatusCode, response.Content.ReadAsStringAsync());
-            response.EnsureSuccessStatusCode();
+        var response = await _client.GetAsync($"/api/v1/flights/?page={page}&size={size}");
+        if (!response.IsSuccessStatusCode)
+            _logger.LogWarning("Failed get flights {statusCode}, {descriprion}", response.StatusCode, response.Content.ReadAsStringAsync());
+        response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsJsonAsync<PaginationFlightsResponse>() ?? throw new InvalidOperationException();
-        }
-        catch (Exception ex) when(ex is HttpRequestException{ StatusCode: >= (HttpStatusCode)500 or null } or BrokenCircuitException)
-        {
-            throw new ServiceUnavailableException("Failed get flights", ex, serviceName: "Flight Service");
-        }
+        return await response.Content.ReadAsJsonAsync<PaginationFlightsResponse>() ?? throw new InvalidOperationException();
     }
 
     public async Task<FlightResponse> GetByNumberAsync(string flightNumber)
     {
-        try
-        {
-            var response = await _client.GetAsync($"/api/v1/flights/{HttpUtility.UrlEncode(flightNumber)}");
-            if (!response.IsSuccessStatusCode)
-                _logger.LogWarning("Failed get flights {statusCode}, {descriprion}", response.StatusCode, response.Content.ReadAsStringAsync());
-            response.EnsureSuccessStatusCode();
+        var response = await _client.GetAsync($"/api/v1/flights/{HttpUtility.UrlEncode(flightNumber)}");
+        if (!response.IsSuccessStatusCode)
+            _logger.LogWarning("Failed get flights {statusCode}, {descriprion}", response.StatusCode, response.Content.ReadAsStringAsync());
+        response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsJsonAsync<FlightResponse>() ?? throw new InvalidOperationException();
-        }
-        catch (Exception ex) when(ex is HttpRequestException{ StatusCode: >= (HttpStatusCode)500 or null } or BrokenCircuitException)
-        {
-            throw new ServiceUnavailableException("Failed get flights", ex, serviceName: "Flight Service");
-        }
+        return await response.Content.ReadAsJsonAsync<FlightResponse>() ?? throw new InvalidOperationException();
     }
 }

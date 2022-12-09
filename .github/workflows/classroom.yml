@@ -2,6 +2,11 @@ name: GitHub Classroom Workflow
 on:
   push:
     branches: [ master ]
+
+env:
+  KUBE_URL: ${{ secrets.KUBE_URL }}
+  KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
+
 jobs:
   build:
     name: Autograding
@@ -14,28 +19,17 @@ jobs:
       - uses: docker/setup-buildx-action@v2
 
       # TODO build, publish to docker hub, deploy to k8s
-      # - name: Build and publish images
-      #   timeout-minutes: 10
-      #   run: |
-      #     ./scripts/publish.sh
-      #     docker compose build
-      #     ./scripts/push-images.sh
-      - uses: engineerd/setup-kind@v0.5.0
-      - name: Create cluster
+      - name: Build and publish images
+        timeout-minutes: 15
         run: |
-          kubectl cluster-info
-          kubectl get pods -n kube-system
-          echo "current-context:" $(kubectl config current-context)
-          echo "environment-kubeconfig:" ${KUBECONFIG}
-          echo "pwd:" ${pwd}
-          cd k8s
-          helm install postgres ./postgres-chart
-          ./scripts/fill-db.sh
-          helm install rabbitmq bitnami/rabbitmq --set image.repository='rabbitmq',image.tag='3.9.2-management-alpine',auth.username='guest',auth.password='guest'
-          helm install services ./services-chart
-          kubectl apply -f load-balancer.yaml
-          kubectl get services
-          kubectl get pods
+          ./scripts/build-images.sh
+
+      - name: Deploy
+        run: |
+          kubectl config set-cluster rsoi-flights-service-cluster --server="$KUBE_URL" --insecure-skip-tls-verify=true
+          kubectl config set-credentials cloud_okteto_com-user --token="$KUBE_TOKEN"
+          kubectl config set-context default --cluster=rsoi-flights-service-cluster --user=cloud_okteto_com-user --namespace="maxim-kozlov"
+          cd k8s && (helm delete services | true) && helm install services ./services-chart/
           sleep 45
 
       - name: Run API Tests

@@ -33,5 +33,5 @@ public class FlightResponse
     /// Стоимость
     /// </summary>
     [JsonProperty("price")]
-    public int Price { get; set; }
+    public double Price { get; set; }
 }

@@ -5,8 +5,6 @@ using System.Net.Http;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using FlightBooking.FlightService.Dto;
-using FlightBooking.Gateway.Dto;
-using FlightBooking.Gateway.Exceptions;
 using FlightBooking.Gateway.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,10 +49,15 @@ public class FlightsController : ControllerBase
             var statusCode = ex.StatusCode ?? HttpStatusCode.BadRequest;
             return StatusCode((int)statusCode, ex.Source);
         }
-        catch (ServiceUnavailableException ex)
+        catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Service is inoperative, please try later on");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new MessageDto($"{ex.ServiceName} unavailable"));
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, "flight-service");
+        }
+        catch (BrokenCircuitException ex)
+        {
+            _logger.LogError(ex, "Service is inoperative, please try later on (BrokenCircuit)");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, "flight-service");
         }
         catch (Exception ex)
         {

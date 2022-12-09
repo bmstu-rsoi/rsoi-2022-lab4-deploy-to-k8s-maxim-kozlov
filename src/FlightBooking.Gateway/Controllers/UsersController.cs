@@ -4,11 +4,8 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Threading.Tasks;
-using FlightBooking.BonusService.Dto;
 using FlightBooking.Gateway.Domain;
-using FlightBooking.Gateway.Dto;
 using FlightBooking.Gateway.Dto.Users;
-using FlightBooking.Gateway.Exceptions;
 using FlightBooking.Gateway.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -47,16 +44,16 @@ public class UsersController : ControllerBase
         try
         {
             var response = new UserInfoResponse();
-            var tickets = await _ticketsService.GetAllAsync(username);
-            response.Tickets = tickets.ToArray();
+            response.Privilege = await _privilegeRepository.GetAsync(username, needHistory: false);
             
             try
             {
-                response.Privilege = await _privilegeRepository.GetAsync(username, needHistory: false);
+                var tickets = await _ticketsService.GetAllAsync(username);
+                response.Tickets = tickets.ToArray();
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                _logger.LogError(ex, "Failed get bonus for {username}", username);
+                // ignore
             }
             
             return Ok(response);
@@ -64,11 +61,6 @@ public class UsersController : ControllerBase
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             return NotFound(username);
-        }
-        catch (ServiceUnavailableException ex)
-        {
-            _logger.LogError(ex, "Service is inoperative, please try later on");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new MessageDto($"{ex.ServiceName} unavailable"));
         }
         catch (Exception ex)
         {

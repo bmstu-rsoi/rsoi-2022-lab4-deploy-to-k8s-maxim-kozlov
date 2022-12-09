@@ -3,7 +3,6 @@ using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using FlightBooking.Gateway.Domain;
-using FlightBooking.Gateway.Extensions;
 using FlightBooking.Gateway.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -33,9 +32,9 @@ public class Startup
     {
         services.AddHealthChecks()
             .AddCheck("self", () => HealthCheckResult.Healthy())
-            .AddUrlGroup(new Uri(Configuration["FlightsService:Host"] + "/manage/health"), name: "flights-service-check", failureStatus: HealthStatus.Degraded)
-            .AddUrlGroup(new Uri(Configuration["TicketService:Host"] + "/manage/health"), name: "ticket-service-check", failureStatus: HealthStatus.Degraded)
-            .AddUrlGroup(new Uri(Configuration["PrivilegeService:Host"] + "/manage/health"), name: "bonus-service-check", failureStatus: HealthStatus.Degraded);
+            .AddUrlGroup(new Uri(Configuration["FlightsService:Host"]), name: "flights-service-check")
+            .AddUrlGroup(new Uri(Configuration["TicketService:Host"]), name: "ticket-service-check")
+            .AddUrlGroup(new Uri(Configuration["PrivilegeService:Host"]), name: "bonus-service-check", failureStatus: HealthStatus.Degraded);
         
         services.AddControllers()
             .AddNewtonsoftJson(options =>
@@ -58,23 +57,20 @@ public class Startup
         // register http services
         services.Configure<FlightsSettings>(Configuration.GetSection("FlightsService"));
         services.AddHttpClient<IFlightsRepository, FlightsRepository>()
-            // .AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetRetryPolicy())
             .AddPolicyHandler(GetCircuitBreakerPolicy());
         
         services.Configure<TicketsSettings>(Configuration.GetSection("TicketService"));
         services.AddHttpClient<ITicketsRepository, TicketsRepository>()
-            // .AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetRetryPolicy())
             .AddPolicyHandler(GetCircuitBreakerPolicy());
         
         services.Configure<PrivilegeSettings>(Configuration.GetSection("PrivilegeService"));
         services.AddHttpClient<IPrivilegeRepository, PrivilegeRepository>()
-            // .AddPolicyHandler(GetWaitAndRetryForeverPolicy())
-            // .AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetRetryPolicy())
             .AddPolicyHandler(GetCircuitBreakerPolicy());
         
         services.AddScoped<ITicketsService, TicketsService>();
-
-        services.AddMassTransit(Configuration);
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,7 +89,10 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapHealthChecks("/manage/health");
+            endpoints.MapHealthChecks("/manage/health", new HealthCheckOptions()
+            {
+                Predicate = _ => true
+            });
             endpoints.MapHealthChecks("/manage/health/liveness", new HealthCheckOptions
             {
                 Predicate = r => r.Name.Contains("self")
@@ -105,13 +104,14 @@ public class Startup
     {
         return HttpPolicyExtensions
             .HandleTransientHttpError()
-            .CircuitBreakerAsync(15, TimeSpan.FromSeconds(10));
+            .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
     }
     
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
     {
         return HttpPolicyExtensions
             .HandleTransientHttpError()
+            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
             .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
     }
 }

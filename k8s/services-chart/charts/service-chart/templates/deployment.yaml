@@ -33,7 +33,7 @@ spec:
             - name: DATABASE_URL
               value: "Host={{ .Values.service.database.host }};User ID={{ .Values.service.database.username }};Password={{ .Values.service.database.password }};Port={{ .Values.service.database.port }};Database={{ .Values.service.database.name }};"
             {{- end }}
-            {{ if .Values.service.rabbitmq.host }}
+            {{ if .Values.service.rabbitmq }}
             - name: RabbitMqTransportOptions__Host
               value: "{{ .Values.service.rabbitmq.host }}"
             - name: RabbitMqTransportOptions__Port
