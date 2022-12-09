@@ -24,13 +24,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # TODO build, publish to docker hub, deploy to k8s
       - name: Build and publish images
         timeout-minutes: 15
         run: |
-          echo "host: $KUBE_HOST"
-
-      # ./scripts/build-images.sh
+          ./scripts/build-images.sh
 
       - name: Deploy
         run: |
