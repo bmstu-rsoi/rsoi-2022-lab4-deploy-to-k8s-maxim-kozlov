@@ -35,13 +35,17 @@ jobs:
       - name: Deploy
         run: |
           echo "run deploy"
-          echo host: "$KUBE_HOST" ${{ secrets.KUBE_HOST }}
-          echo token: "$KUBE_TOKEN" ${{ secrets.KUBE_TOKEN }}
-          echo test: "$test" ${{ secrets.DOCKERHUB_USERNAME }}
-          
-          kubectl config set-cluster rsoi-flights-service-cluster --server="$KUBE_HOST" --insecure-skip-tls-verify=true
-          kubectl config set-credentials cloud_okteto_com-user --token="$KUBE_TOKEN"
+
+          echo kubectl config set-cluster rsoi-flights-service-cluster --server=${{ secrets.KUBE_HOST }} --insecure-skip-tls-verify=true
+          kubectl config set-cluster rsoi-flights-service-cluster --server=${{ secrets.KUBE_HOST }} --insecure-skip-tls-verify=true
+
+          echo kubectl config set-credentials cloud_okteto_com-user --token=${{ secrets.KUBE_TOKEN }}
+          kubectl config set-credentials cloud_okteto_com-user --token=${{ secrets.KUBE_TOKEN }}
+
+          echo kubectl config set-context default --cluster=rsoi-flights-service-cluster --user=cloud_okteto_com-user --namespace=\"maxim-kozlov\"
           kubectl config set-context default --cluster=rsoi-flights-service-cluster --user=cloud_okteto_com-user --namespace="maxim-kozlov"
+          
+          echo kubectl get pods
           kubectl get pods
 
           cd k8s && helm upgrade services ./services-chart
