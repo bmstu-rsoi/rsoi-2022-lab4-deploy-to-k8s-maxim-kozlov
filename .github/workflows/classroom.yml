@@ -31,17 +31,13 @@ jobs:
           echo "$KUBE_URL"
 
       # ./scripts/build-images.sh
-
-      - uses: actions-hub/kubectl@master
-        env:
-          KUBE_HOST: ${{ secrets.KUBE_URL }}
-          KUBE_CERTIFICATE: ${{ secrets.KUBE_CERTIFICATE }}
-          KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
-        with:
-          args: get pods
       
       - name: Deploy
         run: |
+          echo "run deploy"
+          kubectl config set-cluster rsoi-flights-service-cluster --server="$KUBE_URL" --insecure-skip-tls-verify=true
+          kubectl config set-credentials cloud_okteto_com-user --token="$KUBE_TOKEN"
+          kubectl config set-context default --cluster=rsoi-flights-service-cluster --user=cloud_okteto_com-user --namespace="maxim-kozlov"
           cd k8s && (helm delete services | true) && helm install services ./services-chart/
           sleep 45
 
