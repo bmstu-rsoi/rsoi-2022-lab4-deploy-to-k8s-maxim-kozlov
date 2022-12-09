@@ -36,8 +36,8 @@ jobs:
         run: |
           echo "run deploy"
 
-          echo kubectl config set-cluster rsoi-flights-service-cluster --server=${{ secrets.KUBE_HOST }} --insecure-skip-tls-verify=true
-          kubectl config set-cluster rsoi-flights-service-cluster --server=${{ secrets.KUBE_HOST }} --insecure-skip-tls-verify=true
+          echo kubectl config set-cluster rsoi-flights-service-cluster --server=https://146.148.56.200:443 --insecure-skip-tls-verify=true
+          kubectl config set-cluster rsoi-flights-service-cluster --server=https://146.148.56.200:443 --insecure-skip-tls-verify=true
 
           echo kubectl config set-credentials cloud_okteto_com-user --token=${{ secrets.KUBE_TOKEN }}
           kubectl config set-credentials cloud_okteto_com-user --token=${{ secrets.KUBE_TOKEN }}
