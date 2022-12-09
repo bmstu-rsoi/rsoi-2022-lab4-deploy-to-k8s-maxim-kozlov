@@ -28,16 +28,16 @@ jobs:
       - name: Build and publish images
         timeout-minutes: 15
         run: |
-          echo "$KUBE_URL"
+          echo "host: $KUBE_HOST"
 
       # ./scripts/build-images.sh
 
       - name: Deploy
         run: |
           echo "run deploy"
-          echo "$KUBE_HOST"
-          echo "$KUBE_TOKEN"
-          echo "$test"
+          echo host: "$KUBE_HOST" ${{ secrets.KUBE_HOST }}
+          echo token: "$KUBE_TOKEN" ${{ secrets.KUBE_TOKEN }}
+          echo test: "$test" ${{ secrets.DOCKERHUB_USERNAME }}
           
           kubectl config set-cluster rsoi-flights-service-cluster --server="$KUBE_HOST" --insecure-skip-tls-verify=true
           kubectl config set-credentials cloud_okteto_com-user --token="$KUBE_TOKEN"
