@@ -43,6 +43,8 @@ spec:
             - name: RabbitMqTransportOptions__Pass
               value: "{{ .Values.service.rabbitmq.password }}"
             {{- end }}
+            - name: "PORT"
+              value: {{ .Values.service.port | quote }}
             {{- range $key, $value := .Values.service.enviroments }}
             - name: {{ $key }}
               value: {{ $value | quote }}

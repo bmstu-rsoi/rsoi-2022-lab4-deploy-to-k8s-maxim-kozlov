@@ -4,7 +4,7 @@ on:
     branches: [ master ]
 
 env:
-  KUBE_URL: ${{ secrets.KUBE_URL }}
+  KUBE_HOST: ${{ secrets.KUBE_HOST }}
   KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
       - name: Deploy
         run: |
           echo "run deploy"
-          kubectl config set-cluster rsoi-flights-service-cluster --server="$KUBE_URL" --insecure-skip-tls-verify=true
+          kubectl config set-cluster rsoi-flights-service-cluster --server="$KUBE_HOST" --insecure-skip-tls-verify=true
           kubectl config set-credentials cloud_okteto_com-user --token="$KUBE_TOKEN"
           kubectl config set-context default --cluster=rsoi-flights-service-cluster --user=cloud_okteto_com-user --namespace="maxim-kozlov"
           kubectl get pods

@@ -4,7 +4,7 @@
 	"values": [
 		{
 			"key": "baseUrl",
-			"value": "http://gateway.maxim-kozlov.cloud.okteto.net",
+			"value": "https://load-blancer-maxim-kozlov.cloud.okteto.net",
 			"enabled": true
 		}
 	],
