@@ -32,9 +32,9 @@ public class Startup
     {
         services.AddHealthChecks()
             .AddCheck("self", () => HealthCheckResult.Healthy())
-            .AddUrlGroup(new Uri(Configuration["FlightsService:Host"]), name: "flights-service-check")
-            .AddUrlGroup(new Uri(Configuration["TicketService:Host"]), name: "ticket-service-check")
-            .AddUrlGroup(new Uri(Configuration["PrivilegeService:Host"]), name: "bonus-service-check", failureStatus: HealthStatus.Degraded);
+            .AddUrlGroup(new Uri(Configuration["FlightsService:Host"] + "/manage/health"), name: "flights-service-check")
+            .AddUrlGroup(new Uri(Configuration["TicketService:Host"] + "/manage/health"), name: "ticket-service-check")
+            .AddUrlGroup(new Uri(Configuration["PrivilegeService:Host"] + "/manage/health"), name: "bonus-service-check", failureStatus: HealthStatus.Degraded);
         
         services.AddControllers()
             .AddNewtonsoftJson(options =>
