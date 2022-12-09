@@ -32,7 +32,7 @@ jobs:
 
       # ./scripts/build-images.sh
       
-      - uses: actions-hub/kubectl@1.14.3
+      - uses: actions-hub/kubectl@master
         env:
           KUBE_HOST: ${{ secrets.KUBE_HOST }}
           KUBE_CERTIFICATE: ${{ secrets.KUBE_CERTIFICATE }}
@@ -52,7 +52,7 @@ jobs:
           cd k8s && (helm delete services | true) && helm install services ./services-chart/
           sleep 45
         continue-on-error: true
-        
+
       - name: Run API Tests
         uses: matt-ball/newman-action@master
         with:
